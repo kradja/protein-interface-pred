@@ -1,2 +1,5 @@
 # dataset files
 **/*.cpkl
+
+# jupyter notebook checkpoints
+**/.ipynb_checkpoints/*
