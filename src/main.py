@@ -3,6 +3,7 @@ import os
 
 import data_preprocessing as dp
 
+# Data Location and Paper Implementation
 # https://github.com/fouticus/pipgcn/tree/fd5f12c26fcabf4934d0a27fbc5a6753e0910fcd
 # https://zenodo.org/record/1127774#.ZBD7fy-B0UR
 
