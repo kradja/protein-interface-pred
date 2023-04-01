@@ -1,2 +1,24 @@
-.*
-data/**
+#input files
+input/**/data/*
+**/.cpkl
+
+#output files
+output/**
+*.out
+*.swp
+*.csv
+
+# log files
+*.log
+
+#IDE files (PyCharm/ IntelliJ)
+.idea/
+
+#pycache
+**/__pycache__/**
+*.pyc
+
+
+#jupyter-notebook cache
+**/.ipynb_checkpoints/*
+src/jupyter-notebooks/runs/*
