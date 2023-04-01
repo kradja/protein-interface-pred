@@ -14,5 +14,5 @@ Example: `python src/scripts/preprocess_pdb_dbv5_dataset.py -if C:\Dev\git\prote
 
 This script will - 
 1. Read the dataset file
-2. Create networkx individual graphs for ligands and receptor of each protein complex
-3. Write each networkx graph in the 'adjacency list' format in the specified output directory
+2. Create individual networkx graphs for ligands and receptors of each protein complex
+3. Write each networkx graph in 'adjacency list' format in the specified output directory
