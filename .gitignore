@@ -7,6 +7,9 @@ output/**
 *.out
 *.swp
 *.csv
+# don't ignore the evaluation results
+!output/evaluation/**
+!output/visualizations/**
 
 #log files
 *.log
