@@ -5,6 +5,7 @@ import tqdm
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 import torch.nn as nn
+from torch.utils.tensorboard import SummaryWriter
 
 from src.prediction.models.gnn.pdb_db_dataset import PDB_DB_Dataset
 from src.prediction.models.gnn.gcn_ff import GCN_FFN
@@ -74,25 +75,38 @@ def execute(input_settings, output_settings, classification_settings):
             else:
                 continue
             gnn_model = gnn_model.to(utils.get_device())
-            result = run_gnn_model(gnn_model, train_data_loader, test_data_loader)
-            result["model"]: model_name
-            result["itr"]: itr
+            result = run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name)
+            result["model"] = model_name
+            result["itr"] = itr
             results[model_name].append(result)
 
     # 5. Write the classification output
     utils.write_output(results, output_dir, output_prefix, "output")
 
 
-def run_gnn_model(gnn_model, train_data_loader, test_data_loader):
+def run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name):
     lr = 1e-4
-
-    optimizer = torch.optim.Adam(gnn_model.parameters(), lr=lr, weight_decay=5e-4)
+    tbw = SummaryWriter()
+    optimizer = torch.optim.Adam(gnn_model.parameters(), lr=lr, weight_decay=1e-4)
     # CrossEntropyLoss applies log softmax to the output followed by computation of negative log likelihood
     # So, we did not include F.log_softmax() activation in the Feed Forward Network
     criterion = nn.CrossEntropyLoss()
     # Training
+
+    n_epochs = 5
+    train_itr = 0
+    test_itr = 0
+    for epoch in range(n_epochs):
+        gnn_model, train_itr = train_gnn_model(gnn_model, train_data_loader, optimizer, criterion, tbw, model_name, train_itr, epoch)
+        _, test_itr = test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, test_itr, epoch, log_loss=True)
+    results, _ = test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr=None, epoch=None, log_loss=False)
+    return results
+
+
+def train_gnn_model(gnn_model, train_data_loader, optimizer, criterion, tbw, model_name, itr, epoch):
     gnn_model.train()
-    for itr, batch in enumerate(pbar := tqdm.tqdm(train_data_loader)):
+    for _, batch in enumerate(pbar := tqdm.tqdm(train_data_loader)):
+        itr += 1
         ligand_graph, receptor_graph, pairs, labels = batch
 
         optimizer.zero_grad()
@@ -101,19 +115,29 @@ def run_gnn_model(gnn_model, train_data_loader, test_data_loader):
         loss = criterion(output, labels.squeeze())
         loss.backward()
         optimizer.step()
-        pbar.set_description(f"Classification/training-loss={float(loss.item())}, n_graph_pairs_procesed={itr+1}")
+        train_loss = float(loss.item())
+        pbar.set_description(f"{model_name}/training-loss={train_loss}, epoch={epoch+1}")
+        tbw.add_scalar(f"{model_name}/training-loss", train_loss, itr)
+    return gnn_model, itr
 
+
+def test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr, epoch, log_loss=True):
     gnn_model.eval()
     results = []
-    for itr, batch in enumerate(pbar:= tqdm.tqdm(test_data_loader)):
+    for _, batch in enumerate(pbar := tqdm.tqdm(test_data_loader)):
         ligand_graph, receptor_graph, pairs, labels = batch
 
         output = gnn_model(ligand_graph, receptor_graph, pairs).to(utils.get_device()).squeeze()
         loss = criterion(output, labels.squeeze())
-        pbar.set_description(f"Classification/validation-loss={float(loss.item())}, n_graph_pairs_procesed={itr+1}")
+        val_loss = float(loss.item())
+        if log_loss:
+            itr += 1
+            pbar.set_description(f"{model_name}/validation-loss={float(loss.item())}, epoch={epoch+1}")
+            tbw.add_scalar(f"{model_name}/validation-loss", val_loss, itr)
         # Explicity apply softmax to the output to get the probabilities, since
-        # we did not include F.log_softmax() activation in the Feed Forward Network
-        output = F.log_softmax(output, dim=-1)
-        output = torch.argmax(output, dim=1, keepdim=True)
-        results.append(pd.DataFrame({"y_pred": output.squeeze().numpy(), "y_true": labels.squeeze().numpy()}))
-    return pd.concat(results, ignore_index=True)
+        # we did not include F.softmax() activation in the Feed Forward Network
+        output = F.softmax(output, dim=-1)
+        results.append(pd.DataFrame({
+            "y_pred": output.squeeze().detach()[:, 1].numpy(),
+            "y_true": labels.squeeze().numpy()}))
+    return pd.concat(results, ignore_index=True), itr

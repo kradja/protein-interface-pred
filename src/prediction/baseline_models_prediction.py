@@ -60,8 +60,8 @@ def execute(input_settings, output_settings, classification_settings):
                 continue
             results[model_name].append(pd.DataFrame({"y_pred": y_pred[:, 1], "y_true": y_test, "model": model_name, "itr": itr}))
 
-        # 5. Write the classification output
-        utils.write_output(results, output_dir, output_prefix, "output")
+    # 5. Write the classification output
+    utils.write_output(results, output_dir, output_prefix, "output")
 
 
 def read_dataset(input_files):

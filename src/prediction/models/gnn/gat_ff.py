@@ -4,7 +4,6 @@ from torch_geometric.nn import GATConv
 from src.prediction.models.gnn.ffn import FFN_2L
 
 
-
 class GAT_FFN(torch.nn.ModuleList):
     def __init__(self, n_node_features, h1, n_gcn_output_features, h2, n_classes):
         super(GAT_FFN, self).__init__()
@@ -15,9 +14,9 @@ class GAT_FFN(torch.nn.ModuleList):
     def forward(self, data_l, data_r, X):
         x_ligand = self.ligand_gcn(data_l)
         x_receptor = self.ligand_gcn(data_r)
-        # shape pf X is b x n x 2
-        # since in our case, b is always 1: we are processing one pair of graphs at a time
-        # we can squeeze X
+        # shape of X is b x n x 2
+        # in our case, b is always 1: we are processing one pair of graphs at a time
+        # so, we squeeze X
         X = X.squeeze()
         l_nodes = x_ligand[X[:, 0], :]
         r_nodes = x_receptor[X[:, 1], :]

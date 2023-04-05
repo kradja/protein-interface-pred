@@ -10,8 +10,8 @@ input_settings:
   # Names of training and testing file(s) to be read and processed.
   # Ignored for gnn models
   file_names:
-    train: [ "train.csv" ]
-    test: [ "test.csv" ]
+    train: [ "train.cpkl.csv" ]
+    test: [ "test.cpkl.csv" ]
 
 classification_settings:
   # defines the construction of training and testing dataset
@@ -22,15 +22,15 @@ classification_settings:
   models:
     - name: "lr"
       active: True
-      C: [0.01, 0.03, 0.1, 0.3, 1, 3]
+      C: [0.01, 0.1, 1]
 
     - name: "rf"
       active: True
-      n_estimators: [10, 50, 100, 500, 1000]
+      n_estimators: [10, 50, 100]
       max_depth: [3, 5]
 
 
 output_settings:
-  output_dir: "output/raw/20230403"
-  prefix: "pdb-dbv5-baseline"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
+  output_dir: "output/raw/20230405"
+  prefix: "pdb-dbv5"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
   # example: lr_n5_output.csv

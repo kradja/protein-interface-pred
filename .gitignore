@@ -8,7 +8,7 @@ output/**
 *.swp
 *.csv
 
-# log files
+#log files
 *.log
 
 #IDE files (PyCharm/ IntelliJ)
@@ -22,3 +22,7 @@ output/**
 #jupyter-notebook cache
 **/.ipynb_checkpoints/*
 src/jupyter-notebooks/runs/*
+
+
+#tensorboard files
+runs/*

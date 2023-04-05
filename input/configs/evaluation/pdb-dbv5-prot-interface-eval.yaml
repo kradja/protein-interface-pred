@@ -9,13 +9,14 @@ input_settings:
 
   file_names:
     # experiment_name (to be used as a key in comparative analysis): file_name
-    "LR": "20230403/pdb-dbv5_lr_output.csv"
-    "RF": "20230403/pdb-dbv5_rf_output.csv"
-    "GCN-FFN": "20230404/pdb-dbv5-gnn_gcn_ff_output.csv"
+    "LR": "20230405/pdb-dbv5_lr_output.csv"
+    "RF": "20230405/pdb-dbv5_rf_output.csv"
+    "GCN-FFN": "20230405/pdb-dbv5_gcn_ff_output.csv"
+    "GAT-FFN": "20230405/pdb-dbv5_gat_ff_output.csv"
 
 evaluation_settings:
   pos_label: 1
-  neg_label: -1
+  neg_label: 0
   # metrics
   auroc: True
   auprc: True
@@ -27,5 +28,5 @@ output_settings:
   output_dir: "output"
   evaluation_dir: "evaluation"
   visualization_dir: "visualizations"
-  dataset_dir: "20230403"
+  dataset_dir: "20230405"
   prefix: "pdb-dbv5"# default: none; default file name = <output_prefix>_<model_name>_output.csv

@@ -23,6 +23,8 @@ def parse_args():
                         help="Absolute path of the output directory\n")
     parser.add_argument('-t', '--type', required=True,
                         help="Supported values: features, graphs. Type of dataset to be constructed: node features or graphs\n")
+    parser.add_argument('-m', '--max_complexes', required=False,
+                        help="Optional: Maximum number of protein complexes to be processed\n")
     args = parser.parse_args()
     return args
 
@@ -48,7 +50,7 @@ def construct_graph(nodes, node_neighborhoods) -> nx.Graph:
     return G
 
 
-def construct_features_dataset(dataset, outputdir, filename):
+def construct_features_dataset(dataset, outputdir, filename, max_complexes):
     # construct the dataset as follows:
     #  - for each complex
     #    - for each element in labels attribute of the form (l_vertex_idx, r_vertex_idx, label)
@@ -62,7 +64,12 @@ def construct_features_dataset(dataset, outputdir, filename):
     data_rows = []
     # dataset[0] is the list of protein complex ids
     # dataset[1] is the list of data for each protein complex
-    for prot_complex in dataset[1]:
+    prot_complexes = dataset[1]
+    # hack to tackle insufficient memory
+    if max_complexes:
+        prot_complexes = prot_complexes[:int(max_complexes)]
+
+    for prot_complex in prot_complexes:
         l_vertex_features = prot_complex[l_vertex_col]
         r_vertex_features = prot_complex[r_vertex_col]
 
@@ -144,7 +151,7 @@ def main():
 
     if args.type == "features":
         filename = os.path.basename(os.path.realpath(input_filepath))
-        construct_features_dataset(dataset, output_dirpath, filename)
+        construct_features_dataset(dataset, output_dirpath, filename, args.max_complexes)
     elif args.type == "graphs":
         construct_graphs(dataset, output_dirpath)
         write_metadata(dataset, output_dirpath)

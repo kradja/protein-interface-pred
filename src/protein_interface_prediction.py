@@ -2,8 +2,8 @@
 import argparse
 import yaml
 
-from prediction import prediction
-from evaluation import evaluation
+from src.prediction import prediction
+from src.evaluation import evaluation
 
 
 def parse_args():
