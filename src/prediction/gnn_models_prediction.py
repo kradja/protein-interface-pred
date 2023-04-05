@@ -64,6 +64,7 @@ def execute(input_settings, output_settings, classification_settings):
                     h2=32,
                     n_classes=2)
             elif model["name"] == "gat_ff":
+                print("Executing GAT + Feed Forward Network")
                 gnn_model = GAT_FFN(
                     n_node_features=70,
                     h1=32,
