@@ -71,7 +71,6 @@ def execute(input_settings, output_settings, classification_settings):
                     n_gcn_output_features=32,
                     h2=32,
                     n_classes=2)
-                print("GAT + Feed Forward Layer")
             else:
                 continue
             gnn_model = gnn_model.to(utils.get_device())

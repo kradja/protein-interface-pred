@@ -81,7 +81,7 @@ def construct_features_dataset(dataset, outputdir, filename):
 
     # split the amino_acid_pair_features col into individual columns
     df = pd.concat([df[label_col], pd.DataFrame(df[features_col].to_list())], axis=1)
-    # replace all -1 labels with 0 for compatibility with GNN models
+    # replace all -1 labels with 0 for downstream compatibility
     df.loc[df[label_col] == -1, label_col] = 0
     print(f"Size of dataset = {df.shape}")
     df.to_csv(os.path.join(outputdir, f"{filename}.csv"), index=False)
