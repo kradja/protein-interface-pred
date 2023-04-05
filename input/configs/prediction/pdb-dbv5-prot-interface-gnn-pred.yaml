@@ -1,0 +1,25 @@
+config_type: "prediction" # options: data_preprocessor, prediction, evaluation
+
+# Input Settings:
+  ## initialize base input folder name
+  ## provide path to dataset folder
+input_settings:
+  # Base input directory
+  input_dir: "input/data/pdb-dbv5/protein_complex_graphs"
+
+classification_settings:
+  # defines the construction of training and testing dataset
+  type: "gnn" # supported values: baseline, gnn
+  n_iterations: 5
+  models:
+    - name: "gcn_ff"
+      active: True
+
+    - name: "gat_ff"
+      active: True
+
+
+output_settings:
+  output_dir: "output/raw/20230404"
+  prefix: "pdb-dbv5"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
+  # example: lr_n5_output.csv

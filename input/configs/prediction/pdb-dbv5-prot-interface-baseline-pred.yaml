@@ -5,15 +5,20 @@ config_type: "prediction" # options: data_preprocessor, prediction, evaluation
   ## provide path to dataset folder
 input_settings:
   # Base input directory
-  input_dir: "input/data/pdb-dbv5"
+  input_dir: "input/data/pdb-dbv5/residue_features_dataset"
 
   # Names of training and testing file(s) to be read and processed.
+  # Ignored for gnn models
   file_names:
-    train: [ "train.cpkl" ]
-    test: [ "test.cpkl" ]
+    train: [ "train.csv" ]
+    test: [ "test.csv" ]
 
 classification_settings:
+  # defines the construction of training and testing dataset
+  type: "baseline" # supported values: baseline, gnn
   n_iterations: 5
+  train_proportion: 0.8
+  label_col: "label"
   models:
     - name: "lr"
       active: True
@@ -26,6 +31,6 @@ classification_settings:
 
 
 output_settings:
-  output_dir: "output/raw/20230331"
-  prefix: ""   # default: none; default file name = <model_name>_<param_name><param_val>_n<n_iterations>_<output_prefix>_output.csv
-  # example: lr_c0.1_n5_output.csv
+  output_dir: "output/raw/20230403"
+  prefix: "pdb-dbv5-baseline"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
+  # example: lr_n5_output.csv
