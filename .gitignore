@@ -3,13 +3,13 @@ input/**/data/*
 **/.cpkl
 
 #output files
-output/**
+output/*
 *.out
 *.swp
 *.csv
 # don't ignore the evaluation results
-!output/evaluation/**
-!output/visualizations/**
+!output/evaluation/**/*.csv
+!output/visualizations/**/*.png
 
 #log files
 *.log
