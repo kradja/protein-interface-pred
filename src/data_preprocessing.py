@@ -15,7 +15,7 @@ def convert_data(input_file):
     return data
 
 
-def write_tensors(data, processed_path,neg_ratio=50):
+def write_tensors(data, processed_path,file_descrip):
     """Writing tensors for each complex to processed folder"""
     complex_data = dict()
     for ind, complex_id in enumerate(data[0]):
@@ -58,9 +58,13 @@ def write_tensors(data, processed_path,neg_ratio=50):
                 "x": torch.tensor(receptor_aa_features, dtype=torch.float),
                 "edge_index": torch.tensor(receptor_edge_index, dtype=torch.long),
                 "edge_attr": torch.tensor(receptor_edge_attr, dtype=torch.float)
-            }
+            },
+            "label": torch.tensor(aa_label, dtype=torch.long)
         }
-        complex_tensor_file = os.path.join(processed_path,f"{complex_id}_tensors.pt")
-        torch.save(complex_tensors, complex_tensor_file)
-        complex_data[complex_id] = complex_tensor_file
-    return complex_data
+        # complex_tensor_file = os.path.join(processed_path,f"{complex_id}_tensors.pt")
+        # torch.save(complex_tensors, complex_tensor_file)
+        complex_data[complex_id] = complex_tensors # complex_tensor_file
+
+    complex_tensor_file = os.path.join(processed_path,f"{file_descrip}_tensors.pt")
+    torch.save(complex_data, complex_tensor_file)
+    return complex_tensor_file

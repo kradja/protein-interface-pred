@@ -23,15 +23,16 @@ def main(args):
     if args.preprocess:
         train = dp.convert_data(os.path.join(params["raw"], "train.cpkl"))
         test = dp.convert_data(os.path.join(params["raw"], "test.cpkl"))
-        complex_train_files = dp.write_tensors(train, params["processed"])
-        complex_test_files = dp.write_tensors(test, params["processed"])
+        complex_train_files = dp.write_tensors(train, params["processed"],"complex_train")
+        complex_test_files = dp.write_tensors(test, params["processed"],"complex_test")
 
         # Write the complex files to json
         write_json(complex_train_files, os.path.join(params["processed"], "complex_train.json"))
         write_json(complex_test_files, os.path.join(params["processed"], "complex_test.json"))
     if args.running:
-        read_json(os.path.join(params["processed"], "complex_train.json"))
-        read_json(os.path.join(params["processed"], "complex_test.json"))
+        complex_train_files = read_json(os.path.join(params["processed"], "complex_train.json"))
+        complex_test_files = read_json(os.path.join(params["processed"], "complex_test.json"))
+        models.run_gcn(complex_train_files, complex_test_files)
         print("hey")
 
 
