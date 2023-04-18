@@ -27,6 +27,8 @@ def write_tensors(data, processed_path,file_descrip):
 
         # Labels for pairs between ligand and receptor
         aa_label = data[1][ind]["label"]
+        mask = aa_label[:,2] == -1
+        aa_label[mask,2] = 0
 
         # Edge Attributes for ligand and Receptor
         ligand_edge_attr = data[1][ind]['l_edge']

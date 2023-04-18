@@ -69,16 +69,6 @@ class PairData(Data):
             return self.x_t.size(0)
         return super().__inc__(key, value,*args,**kwargs)
 
-#class PairDataset(DataLoader):
-#    def __init__(self, data_list):
-#        self.data_list = data_list
-#
-#    def __len__(self):
-#        return len(self.data_list)
-#
-#    def __getitem__(self, index):
-#        return self.data_list[index]
-
 def _make_data_loader(data, batch_size, shuffle):
     """If I remove edge attributes my data loader works fine and can have multiple batches"""
     data_list = []
@@ -95,29 +85,19 @@ def _train(model, crit, optimizer, input_data):
     model.train()
     for batch in input_data:
         optimizer.zero_grad()
-        # y = batch.y[:,2]
         output = model(batch.x_s, batch.edge_index_s, batch.x_t, batch.edge_index_t,batch.y)
-        pdb.set_trace()
         loss = crit(output, batch.y[:,2])
         loss.backward()
         optimizer.step()
     return loss.item()
 
-#def collate_pair_data(batch):
-#    pdb.set_trace()
-#    x_list, edge_index_list, edge_attr_list, y_list = [], [], [], []
-#    for data in batch:
-#        print(data)
-#        x_list.append(data.x)
-#        edge_index_list.append(data.edge_index)
-#        edge_attr_list.append(data.edge_attr)
-#        y_list.append(data.y)
-#    return PairData(
-#        x=torch.cat(x_list, dim=0),
-#        edge_index=torch.cat(edge_index_list, dim=1),
-#        edge_attr=torch.cat(edge_attr_list, dim=0),
-#        y=torch.tensor(y_list)
-#    )
+def _test(model, crit, input_data):
+    model.eval()
+    loss = 0
+    for batch in input_data:
+        output = model(batch.x_s, batch.edge_index_s, batch.x_t, batch.edge_index_t,batch.y)
+        loss += crit(output, batch.y[:,2]).item()
+    return loss / len(input_data)
 
 def run_gcn(train,test):
     results = {}
@@ -131,20 +111,9 @@ def run_gcn(train,test):
     model = FFN_GCNs(in_dim=70, hidden_dim=32, out_dim=2, num_layers=2, dropout=0.5)
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     crit = nn.CrossEntropyLoss()
-    loss = _train(model, crit, optimizer, train_loader)
-    #loss = train(model, crit, optimizer, data, label)
-    #print("Epoch: {}, Loss: {}".format(epoch, loss))
+    for epoch in range(10):
+        loss = _train(model, crit, optimizer, train_loader)
+        train_acc = _test(model, crit, train_loader)
+        test_acc = _test(model, crit, test_loader)
+        print(f"Epoch: {epoch}, Loss: {loss}, Train Acc: {train_acc}, Test Acc: {test_acc}")
     print("Done")
-
-#def train(model, crit, optimizer, data, label):
-#    optimizer.zero_grad()
-#    output = model(data)
-#    loss = crit(output, label)
-#    loss.backward()
-#    optimizer.step()
-#    return loss.item()
-#
-#def test(model, crit, data, label):
-#    output = model(data)
-#    loss = crit(output, label)
-#    return loss.item()
