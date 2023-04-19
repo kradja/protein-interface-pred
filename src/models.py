@@ -83,20 +83,24 @@ def _make_data_loader(data, batch_size, shuffle):
 
 def _train(model, crit, optimizer, input_data):
     model.train()
+    totalloss = 0
     for batch in input_data:
         optimizer.zero_grad()
         output = model(batch.x_s, batch.edge_index_s, batch.x_t, batch.edge_index_t,batch.y)
-        loss = crit(output, batch.y[:,2])
+        out = output.flatten().to(torch.float32)
+        loss = crit(out, batch.y[:,2].to(torch.float32))
+        totalloss += loss.item()
         loss.backward()
         optimizer.step()
-    return loss.item()
+    return totalloss #loss.item()
 
 def _test(model, crit, input_data):
     model.eval()
     loss = 0
     for batch in input_data:
         output = model(batch.x_s, batch.edge_index_s, batch.x_t, batch.edge_index_t,batch.y)
-        loss += crit(output, batch.y[:,2]).item()
+        out = output.flatten().to(torch.float32)
+        loss += crit(out, batch.y[:,2].to(torch.float32)).item()
     return loss / len(input_data)
 
 def run_gcn(train,test):
@@ -108,9 +112,9 @@ def run_gcn(train,test):
     test_loader = _make_data_loader(data_test, batch_size=1, shuffle=False) #,num_workers=2)
 
     # Run GCN (The number of features is always 70)
-    model = FFN_GCNs(in_dim=70, hidden_dim=32, out_dim=2, num_layers=2, dropout=0.5)
+    model = FFN_GCNs(in_dim=70, hidden_dim=32, out_dim=1, num_layers=4, dropout=0.5)
     optimizer = optim.Adam(model.parameters(), lr=0.01)
-    crit = nn.CrossEntropyLoss()
+    crit = nn.BCELoss()
     for epoch in range(10):
         loss = _train(model, crit, optimizer, train_loader)
         train_acc = _test(model, crit, train_loader)
