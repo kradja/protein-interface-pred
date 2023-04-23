@@ -9,9 +9,10 @@ from src.utils import utils
 
 
 class PDB_DB_Dataset(Dataset):
-    def __init__(self, dirpath):
+    def __init__(self, dirpath, pos_neg_ratio):
         super(PDB_DB_Dataset, self).__init__()
         self.dirpath = dirpath
+        self.pos_neg_ratio = pos_neg_ratio
         self.prot_complex_ids = None
         self.n_prot_complex_ids = None
         self.prot_interface_pairs = None
@@ -19,7 +20,7 @@ class PDB_DB_Dataset(Dataset):
 
     def init_references(self, dirpath):
         # Read the protein ids
-        prot_complex_ids_filepath =  path.join(dirpath, "protein_complex_ids.txt")
+        prot_complex_ids_filepath = path.join(dirpath, "protein_complex_ids.txt")
         print(f"Reading protein complex ids from {prot_complex_ids_filepath}")
         with open(prot_complex_ids_filepath, "r") as f:
             self.prot_complex_ids = f.read().split("\n")
@@ -29,6 +30,13 @@ class PDB_DB_Dataset(Dataset):
         prot_interface_labels_filepath = path.join(dirpath, "protein_interface_labels.csv")
         print(f"Reading protein interface labels from {prot_interface_labels_filepath}")
         df = pd.read_csv(prot_interface_labels_filepath)
+        if self.pos_neg_ratio:
+            pos_df = df[df["label"] == 1]
+            neg_df = df[df["label"] == 0]
+            n_pos = pos_df.shape[0]
+            n_neg = int(n_pos/self.pos_neg_ratio)
+            neg_df = neg_df.head(n_neg)
+            df = pd.concat([pos_df, neg_df])
         self.prot_interface_pairs = df
 
     def len(self):

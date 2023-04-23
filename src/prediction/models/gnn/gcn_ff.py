@@ -13,7 +13,7 @@ class GCN_FFN(torch.nn.ModuleList):
 
     def forward(self, data_l, data_r, X):
         x_ligand = self.ligand_gcn(data_l)
-        x_receptor = self.ligand_gcn(data_r)
+        x_receptor = self.receptor_gcn(data_r)
         # shape pf X is b x n x 2
         # since in our case, b is always 1: we are processing one pair of graphs at a time
         # we can squeeze X
@@ -30,12 +30,17 @@ class GCN_2L(torch.nn.Module):
     def __init__(self, n_node_features, h, n_output_features):
         super().__init__()
         self.gcn_l1 = GCNConv(n_node_features, h)
+        self.gcn_inter = []
+        for i in range(4):
+            self.gcn_inter.append(GCNConv(h, h))
         self.gcn_l2 = GCNConv(h, n_output_features)
 
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
         x = self.gcn_l1(x, edge_index)
         x = F.relu(x)
+        for gcn in self.gcn_inter:
+            x = F.relu(gcn(x, edge_index))
         x = self.gcn_l2(x, edge_index)
         x = F.relu(x)
         return x

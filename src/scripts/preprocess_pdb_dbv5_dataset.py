@@ -45,7 +45,7 @@ def construct_graph(nodes, node_neighborhoods) -> nx.Graph:
     # and 20 is for the 20 closest neighbor residues
     node_neighborhoods = np.squeeze(node_neighborhoods)
     for i in range(n):
-        for j in range(n_neighbors):
+        for j in node_neighborhoods[i]:
             G.add_edge(i, j)
     return G
 
