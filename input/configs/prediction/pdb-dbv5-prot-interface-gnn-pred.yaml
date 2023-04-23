@@ -22,6 +22,6 @@ classification_settings:
 
 
 output_settings:
-  output_dir: "output/raw/20230416"
+  output_dir: "output/raw/20230423"
   prefix: "gnn6_ff2"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
   # example: lr_n5_output.csv
