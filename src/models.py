@@ -1,6 +1,7 @@
 import pdb
 
 import torch
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -112,6 +113,10 @@ def _train(model, crit, optimizer, input_data):
             batch.x_s, batch.edge_index_s, batch.x_t, batch.edge_index_t, batch.y
         )
         out = output.flatten().to(torch.float32)
+        #tmp = np.array(out.tolist())
+        #rr = np.sum(tmp[np.where(tmp > 0.5)])
+        #if rr > 0:
+        #    print(f'Something! {rr}')
         loss = crit(out, batch.y[:, 2].to(torch.float32))
         totalloss += loss.item()
         loss.backward()
@@ -122,13 +127,19 @@ def _train(model, crit, optimizer, input_data):
 def _test(model, crit, input_data):
     model.eval()
     loss = 0
+    final_out = []
     for batch in input_data:
         output = model(
             batch.x_s, batch.edge_index_s, batch.x_t, batch.edge_index_t, batch.y
         )
         out = output.flatten().to(torch.float32)
+        tmp = np.array(out.tolist())
+        final_out.append(tmp)
+        rr = len(np.where(tmp > 0.5)[0])
+        if rr > 0:
+            print(f'Something! {rr}')
         loss += crit(out, batch.y[:, 2].to(torch.float32)).item()
-    return loss / len(input_data)
+    return final_out, loss / len(input_data)
 
 
 def run_gcn(train, test):
@@ -144,13 +155,13 @@ def run_gcn(train, test):
     )  # ,num_workers=2)
 
     # Run GCN (The number of features is always 70)
-    model = FFN_GCNs(in_dim=70, hidden_dim=32, out_dim=1, num_layers=4, dropout=0.5)
+    model = FFN_GCNs(in_dim=70, hidden_dim=32, out_dim=1, num_layers=2, dropout=0.5)
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     crit = nn.BCELoss()
     for epoch in range(10):
         loss = _train(model, crit, optimizer, train_loader)
-        train_acc = _test(model, crit, train_loader)
-        test_acc = _test(model, crit, test_loader)
+        output_train, train_acc = _test(model, crit, train_loader)
+        output_test, test_acc = _test(model, crit, test_loader)
         print(
             f"Epoch: {epoch}, Loss: {loss}, Train Acc: {train_acc}, Test Acc: {test_acc}"
         )
