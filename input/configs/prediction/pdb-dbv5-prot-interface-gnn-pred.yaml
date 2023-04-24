@@ -15,9 +15,12 @@ classification_settings:
   n_epochs: 5
   models:
     - name: "gcn_ff"
-      active: True
+      active: False
 
     - name: "gat_ff"
+      active: False
+
+    - name: "nnconv_ff"
       active: True
 
 

@@ -47,7 +47,10 @@ def construct_graph(nodes, node_neighborhoods, edge_attributes) -> nx.Graph:
     node_neighborhoods = np.squeeze(node_neighborhoods)
     for i in range(n):
         for j, j_val in enumerate(node_neighborhoods[i]):
-            G.add_edge(i, j_val, edge_attr=edge_attributes[i][j])
+            # the edge attributes are available as a list
+            # store it in the graph with the variable 'edge_attr'
+            # which also is used while converting the networkx graph to pytorch graph
+            G.add_edge(i, j_val, edge_attr=np.array(edge_attributes[i][j]))
     return G
 
 

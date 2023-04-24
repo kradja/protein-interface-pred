@@ -12,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 from src.prediction.models.gnn.pdb_db_dataset import PDB_DB_Dataset
 from src.prediction.models.gnn.gcn_ff import GCN_FFN
 from src.prediction.models.gnn.gat_ff import GAT_FFN
+from src.prediction.models.gnn.nnconv_ff import NNConv_FF
 from src.utils import utils
 
 
@@ -74,6 +75,14 @@ def execute(input_settings, output_settings, classification_settings):
                     h1=32,
                     n_gcn_output_features=32,
                     h2=32,
+                    n_classes=2)
+            elif model["name"] == "nnconv_ff":
+                print(f"Iteration {itr}: Executing NNConv + Feed Forward Network")
+                gnn_model = NNConv_FF(
+                    n_node_features=70,
+                    n_edge_features=2,
+                    n_gnn_output_features=32,
+                    ff_h=32,
                     n_classes=2)
             else:
                 continue
@@ -164,7 +173,7 @@ def test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr,
         if not math.isnan(pos_loss):
             loss_map["pos_loss"] = pos_loss
         if not math.isnan(neg_loss):
-            loss_map["neg_loss"] = pos_loss
+            loss_map["neg_loss"] = neg_loss
 
         if log_loss:
             itr += 1
