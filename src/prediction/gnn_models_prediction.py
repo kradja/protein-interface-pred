@@ -1,4 +1,6 @@
 import os
+
+import numpy as np
 import pandas as pd
 import math
 import torch
@@ -8,6 +10,7 @@ from torch.optim.lr_scheduler import OneCycleLR
 from torch_geometric.loader import DataLoader
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
+from sklearn.utils.class_weight import compute_class_weight
 
 from src.prediction.models.gnn.pdb_db_dataset import PDB_DB_Dataset
 from src.prediction.models.gnn.gcn_ff import GCN_FFN
@@ -87,13 +90,19 @@ def execute(input_settings, output_settings, classification_settings):
             else:
                 continue
             gnn_model = gnn_model.to(utils.get_device())
-            result = run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name, classification_settings["n_epochs"])
+            result = run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name,
+                                   classification_settings["n_epochs"])
             result["model"] = model_name
             result["itr"] = itr
             results[model_name].append(result)
 
     # 5. Write the classification output
     utils.write_output(results, output_dir, output_prefix, "output")
+
+
+def get_criterion(output, labels, weight=None):
+    criterion = nn.CrossEntropyLoss(weight)
+    return criterion(output, labels)
 
 
 def run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name, n_epochs):
@@ -118,13 +127,16 @@ def run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name, n_
     train_itr = 0
     test_itr = 0
     for epoch in range(n_epochs):
-        gnn_model, train_itr = train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, criterion, tbw, model_name, train_itr, epoch)
-        _, test_itr = test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, test_itr, epoch, log_loss=True)
-    results, _ = test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr=None, epoch=None, log_loss=False)
+        gnn_model, train_itr = train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, tbw,
+                                               model_name, train_itr, epoch)
+        _, test_itr = test_gnn_model(gnn_model, test_data_loader, tbw, model_name, test_itr, epoch,
+                                     log_loss=True)
+    results, _ = test_gnn_model(gnn_model, test_data_loader, tbw, model_name, itr=None, epoch=None,
+                                log_loss=False)
     return results
 
 
-def train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, criterion, tbw, model_name, itr, epoch):
+def train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, tbw, model_name, itr, epoch):
     gnn_model.train()
     for _, batch in enumerate(pbar := tqdm.tqdm(train_data_loader)):
         itr += 1
@@ -133,20 +145,26 @@ def train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, crite
         optimizer.zero_grad()
 
         output = gnn_model(ligand_graph, receptor_graph, pairs).to(utils.get_device()).squeeze()
-        loss = criterion(output, labels.squeeze())
+        labels = labels.squeeze()
+
+        loss = get_criterion(output, labels,
+                             weight=torch.tensor(compute_class_weight(
+                                 class_weight="balanced",
+                                 classes=np.unique(labels),
+                                 y=labels.type(torch.float32).cpu().numpy()), dtype=torch.float32))
         loss.backward()
 
         optimizer.step()
         lr_scheduler.step()
 
         train_loss = float(loss.item())
-        pbar.set_description(f"{model_name}/training-loss={train_loss}, epoch={epoch+1}")
+        pbar.set_description(f"{model_name}/training-loss={train_loss}, epoch={epoch + 1}")
         tbw.add_scalar(f"{model_name}/training-loss", train_loss, itr)
         tbw.add_scalar(f"{model_name}/learning-rate", float(lr_scheduler.get_last_lr()[0]), itr)
     return gnn_model, itr
 
 
-def test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr, epoch, log_loss=True):
+def test_gnn_model(gnn_model, test_data_loader, tbw, model_name, itr, epoch, log_loss=True):
     gnn_model.eval()
     results = []
     for _, batch in enumerate(pbar := tqdm.tqdm(test_data_loader)):
@@ -159,11 +177,11 @@ def test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr,
         pos_idx = (labels == 1).nonzero().squeeze()
         neg_idx = (labels == 0).nonzero().squeeze()
 
-        pos_loss = criterion(torch.index_select(output, dim=0, index=pos_idx),
-                             torch.index_select(labels, dim=0, index=pos_idx))
-        neg_loss = criterion(torch.index_select(output, dim=0, index=neg_idx),
-                             torch.index_select(labels, dim=0, index=neg_idx))
-        val_loss = criterion(output, labels)
+        pos_loss = get_criterion(torch.index_select(output, dim=0, index=pos_idx),
+                                 torch.index_select(labels, dim=0, index=pos_idx))
+        neg_loss = get_criterion(torch.index_select(output, dim=0, index=neg_idx),
+                                 torch.index_select(labels, dim=0, index=neg_idx))
+        val_loss = get_criterion(output, labels)
 
         pos_loss = float(pos_loss.item())
         neg_loss = float(neg_loss.item())
@@ -177,7 +195,7 @@ def test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr,
 
         if log_loss:
             itr += 1
-            pbar.set_description(f"{model_name}/validation-loss={val_loss}, epoch={epoch+1}")
+            pbar.set_description(f"{model_name}/validation-loss={val_loss}, epoch={epoch + 1}")
             tbw.add_scalars(f"{model_name}/validation-loss", loss_map, itr)
         # Explicity apply softmax to the output to get the probabilities, since
         # we did not include F.softmax() activation in the Feed Forward Network

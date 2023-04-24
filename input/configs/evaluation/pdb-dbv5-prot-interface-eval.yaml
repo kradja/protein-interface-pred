@@ -13,6 +13,7 @@ input_settings:
     "RF": "20230405/pdb-dbv5_rf_output.csv"
     "GCN2-FFN2": "20230424/gnn2_ff2_pn0.1_gcn_ff_output.csv"
     "GAT2-FFN2": "20230424/gnn2_ff2_pn0.1_gat_ff_output.csv"
+    "NNConv_FFN2": "20230424/gnn2_ff2_pn0.1_nnconv_ff_output.csv"
     #"GCN6-FFN2": "20230416/gnn6_ff2_gcn_ff_output.csv"
     #"GAT6-FFN2": "20230416/gnn6_ff2_gat_ff_output.csv"
 
