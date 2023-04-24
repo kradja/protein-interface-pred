@@ -168,7 +168,7 @@ def test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr,
 
         if log_loss:
             itr += 1
-            pbar.set_description(f"{model_name}/validation-loss={float(val_loss.item())}, epoch={epoch+1}")
+            pbar.set_description(f"{model_name}/validation-loss={val_loss}, epoch={epoch+1}")
             tbw.add_scalars(f"{model_name}/validation-loss", loss_map, itr)
         # Explicity apply softmax to the output to get the probabilities, since
         # we did not include F.softmax() activation in the Feed Forward Network
