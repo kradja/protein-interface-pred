@@ -30,17 +30,12 @@ class GAT_2L(torch.nn.Module):
     def __init__(self, n_node_features, h, n_output_features):
         super().__init__()
         self.gat_l1 = GATConv(n_node_features, h)
-        self.gat_inter = []
-        for i in range(4):
-            self.gat_inter.append(GATConv(h, h))
         self.gat_l2 = GATConv(h, n_output_features)
 
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
         x = self.gat_l1(x, edge_index)
         x = F.relu(x)
-        for gat in self.gat_inter:
-            x = F.relu(gat(x, edge_index))
         x = self.gat_l2(x, edge_index)
         x = F.relu(x)
         return x
