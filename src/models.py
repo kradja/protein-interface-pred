@@ -140,7 +140,7 @@ def _test(model, crit, input_data):
     final_out = []
     for batch in input_data:
         output = model(
-            batch.x_s, batch.edge_index_s, batch.x_t, batch.edge_index_t, batch.y
+            batch.x_s, batch.edge_index_s, batch.edge_attr_s, batch.x_t, batch.edge_index_t, batch.edge_attr_t, batch.y
         )
         out = output.flatten().to(torch.float32)
         # out = torch.round(output.flatten()).to(torch.int)
