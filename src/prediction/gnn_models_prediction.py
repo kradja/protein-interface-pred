@@ -150,8 +150,8 @@ def train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, tbw, 
         loss = get_criterion(output, labels,
                              weight=torch.tensor(compute_class_weight(
                                  class_weight="balanced",
-                                 classes=np.unique(labels),
-                                 y=labels.type(torch.float32).cpu().numpy()), dtype=torch.float32))
+                                 classes=np.unique(labels.cpu().numpy()),
+                                 y=labels.type(torch.float32).cpu().numpy()), dtype=torch.float32).to(utils.get_device()))
         loss.backward()
 
         optimizer.step()
