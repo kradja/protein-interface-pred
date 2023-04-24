@@ -164,6 +164,6 @@ def test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr,
         # we did not include F.softmax() activation in the Feed Forward Network
         output = F.softmax(output, dim=-1)
         results.append(pd.DataFrame({
-            "y_pred": output.squeeze().detach()[:, 1].numpy(),
-            "y_true": labels.squeeze().numpy()}))
+            "y_pred": output.squeeze().cpu().detach()[:, 1].numpy(),
+            "y_true": labels.squeeze().cpu().numpy()}))
     return pd.concat(results, ignore_index=True), itr
