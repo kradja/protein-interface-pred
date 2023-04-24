@@ -19,6 +19,7 @@ class GCN(nn.Module):
         self.edge_attr_mlp = torch.nn.Sequential(nn.Linear(2, hidden_dim), torch.nn.ReLU(),nn.Linear(hidden_dim,in_dim * hidden_dim )) 
         self.conv_layers.append(NNConv(in_dim, hidden_dim, nn = self.edge_attr_mlp)) 
         for i in range(num_layers - 1):
+            self.edge_attr_mlp = torch.nn.Sequential(nn.Linear(2, hidden_dim), torch.nn.ReLU(),nn.Linear(hidden_dim,hidden_dim* hidden_dim )) 
             self.conv_layers.append(NNConv(hidden_dim, hidden_dim,nn = self.edge_attr_mlp)) 
         #self.dropout = nn.Dropout(dropout)
 
@@ -28,9 +29,7 @@ class GCN(nn.Module):
             # self.edge_attr_mlp = torch.nn.Sequential(nn.Linear(np.multiply(*edge_attr.shape[:-1]), self.hidden_dim), torch.nn.ReLU(),nn.Linear(self.hidden_dim,self.hidden_dim ))
             # -1 means infer the dimension from the other given dimension
             edge_attr3 = edge_attr.reshape(edge_attr.shape[0],np.multiply(*edge_attr.shape[1:]))
-            print(edge_attr2.shape)
             # edge_attr_mlp = self.edge_attr_mlp(edge_attr2)#.view(-1,1,40))
-            pdb.set_trace()
             x = conv(x, edge_index,edge_attr2) #edge_attr_mlp.view(-1,1,2))
             x = F.relu(x)
             # x = self.dropout(x)
@@ -122,13 +121,13 @@ def _train(model, crit, optimizer, input_data):
         output = model(
             batch.x_s, batch.edge_index_s, batch.edge_attr_s, batch.x_t, batch.edge_index_t, batch.edge_attr_t, batch.y
         )
-        out = torch.round(output.flatten().to(torch.float32))
+        out = torch.sigmoid(output.to(torch.float32))
         #out = torch.round(output.flatten()).to(torch.int)
         #tmp = np.array(out.tolist())
         #rr = np.sum(tmp[np.where(tmp > 0.5)])
         #if rr > 0:
         #    print(f'Something! {rr}')
-        loss = crit(out, batch.y[:, 2].to(torch.float32))
+        loss = crit(out, batch.y[:, 2].to(torch.float32).unsqueeze(1))
         totalloss += loss.item()
         loss.backward()
         optimizer.step()
