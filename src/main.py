@@ -45,7 +45,8 @@ def main(args):
         complex_test_files = read_json(
             os.path.join(params["processed"], "complex_test.json")
         )
-        models.run_gcn(complex_train_files, complex_test_files)
+        output_predictions = os.path.join(params["processed"],'train_test_pred.pkl')
+        models.run_gcn(complex_train_files, complex_test_files,output_predictions)
         print("hey")
 
 

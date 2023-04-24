@@ -29,14 +29,14 @@ def write_tensors(data, processed_path, file_descrip):
 
         # Edge Attributes for ligand and Receptor
         ligand_edge_attr = data[1][ind]["l_edge"]
-        ligand_edge_attr = ligand_edge_attr.reshape(
-            np.multiply(*ligand_edge_attr.shape[:-1]), 2
-        )
+        #ligand_edge_attr = ligand_edge_attr.reshape(
+        #    np.multiply(*ligand_edge_attr.shape[:-1]), 2
+        #)
 
-        receptor_edge_attr = data[1][ind]["l_edge"]
-        receptor_edge_attr = receptor_edge_attr.reshape(
-            np.multiply(*receptor_edge_attr.shape[:-1]), 2
-        )
+        receptor_edge_attr = data[1][ind]["r_edge"]
+        #receptor_edge_attr = receptor_edge_attr.reshape(
+        #    np.multiply(*receptor_edge_attr.shape[:-1]), 2
+        #)
 
         # Edge Indices for ligand and Receptor
         ligand_ind = data[1][ind]["l_hood_indices"]
