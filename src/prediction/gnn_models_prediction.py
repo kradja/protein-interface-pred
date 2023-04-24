@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import math
 import torch
 import tqdm
 import torch.nn.functional as F
@@ -144,6 +145,8 @@ def test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr,
 
         output = gnn_model(ligand_graph, receptor_graph, pairs).to(utils.get_device()).squeeze()
         labels = labels.squeeze()
+
+        # Loss computation
         pos_idx = (labels == 1).nonzero().squeeze()
         neg_idx = (labels == 0).nonzero().squeeze()
 
@@ -151,15 +154,22 @@ def test_gnn_model(gnn_model, test_data_loader, criterion, tbw, model_name, itr,
                              torch.index_select(labels, dim=0, index=pos_idx))
         neg_loss = criterion(torch.index_select(output, dim=0, index=neg_idx),
                              torch.index_select(labels, dim=0, index=neg_idx))
-
         val_loss = criterion(output, labels)
+
         pos_loss = float(pos_loss.item())
         neg_loss = float(neg_loss.item())
+        val_loss = float(val_loss.item())
+        loss_map = {"val_loss": val_loss}
+
+        if not math.isnan(pos_loss):
+            loss_map["pos_loss"] = pos_loss
+        if not math.isnan(neg_loss):
+            loss_map["neg_loss"] = pos_loss
 
         if log_loss:
             itr += 1
             pbar.set_description(f"{model_name}/validation-loss={float(val_loss.item())}, epoch={epoch+1}")
-            tbw.add_scalars(f"{model_name}/validation-loss", {"pos_loss": pos_loss, "neg_loss": neg_loss}, itr)
+            tbw.add_scalars(f"{model_name}/validation-loss", loss_map, itr)
         # Explicity apply softmax to the output to get the probabilities, since
         # we did not include F.softmax() activation in the Feed Forward Network
         output = F.softmax(output, dim=-1)
