@@ -53,11 +53,11 @@ class PDB_DB_Dataset(Dataset):
         # 3: assume the ligand and receptor have the same attribute keys
         node_attrs = [str(x) for x in list(ligand_graph_nx.nodes[0].keys())]
 
-        ligand_graph = torch_geometric.utils.from_networkx(ligand_graph_nx, group_node_attrs=node_attrs)
+        ligand_graph = torch_geometric.utils.from_networkx(ligand_graph_nx, group_node_attrs=node_attrs)#, group_edge_attrs=["edge_attr"])
         receptor_graph = torch_geometric.utils.from_networkx(
             nx.read_gpickle(
                 path.join(self.dirpath, f"{idx}_{prot_complex_id}_r.gpickle")
-            ), group_node_attrs=node_attrs
+            ), group_node_attrs=node_attrs#, group_edge_attrs=["edge_attr"]
         )
         del ligand_graph_nx  # clear the object to save memory
         prot_complex_interface_pairs = self.prot_interface_pairs[self.prot_interface_pairs["complex_id"] == prot_complex_id]

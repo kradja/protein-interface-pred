@@ -13,6 +13,8 @@ from src.utils import utils
 label_col = "label"
 l_vertex_col = "l_vertex"
 r_vertex_col = "r_vertex"
+l_edge_col = "l_edge"
+r_edge_col = "r_edge"
 
 
 def parse_args():
@@ -29,10 +31,9 @@ def parse_args():
     return args
 
 
-def construct_graph(nodes, node_neighborhoods) -> nx.Graph:
+def construct_graph(nodes, node_neighborhoods, edge_attributes) -> nx.Graph:
     G = nx.Graph()
     n = len(nodes) # number of nodes in graph
-    n_neighbors = 20 # number of neighbors for each node
 
     # nodes = numpy array of shape n x 70 where n is the number of nodes (residues)
     # and 70 is the number of features
@@ -45,8 +46,8 @@ def construct_graph(nodes, node_neighborhoods) -> nx.Graph:
     # and 20 is for the 20 closest neighbor residues
     node_neighborhoods = np.squeeze(node_neighborhoods)
     for i in range(n):
-        for j in node_neighborhoods[i]:
-            G.add_edge(i, j)
+        for j, j_val in enumerate(node_neighborhoods[i]):
+            G.add_edge(i, j_val, edge_attr=edge_attributes[i][j])
     return G
 
 
@@ -58,7 +59,6 @@ def construct_features_dataset(dataset, outputdir, filename, max_complexes):
     #       - get the features of r_vertex corresponding to r_vertex_idx
     #       - concatenate the features
     #       - assign the label
-
 
     features_col = "amino_acid_pair_features"
     data_rows = []
@@ -105,11 +105,11 @@ def construct_graphs(dataset, output_dir):
     for i, prot_complex in enumerate(prot_complexes):
         complex_id = prot_complex["complex_code"]
 
-        G_l = construct_graph(prot_complex[l_vertex_col], prot_complex["l_hood_indices"])
+        G_l = construct_graph(prot_complex[l_vertex_col], prot_complex["l_hood_indices"], prot_complex[l_edge_col])
         print(f"Constructed Complex {i}:{complex_id}-Ligand --> "
               f"nodes={G_l.number_of_nodes()}, edges={G_l.number_of_edges()}")
 
-        G_r = construct_graph(prot_complex[r_vertex_col], prot_complex["r_hood_indices"])
+        G_r = construct_graph(prot_complex[r_vertex_col], prot_complex["r_hood_indices"], prot_complex[r_edge_col])
         print(f"Constructed Complex {i}:{complex_id}-Receptor --> "
               f"nodes={G_r.number_of_nodes()}, edges={G_r.number_of_edges()}")
 

@@ -10,9 +10,9 @@ input_settings:
 classification_settings:
   # defines the construction of training and testing dataset
   type: "gnn" # supported values: baseline, gnn
-  pos_neg_ratio: 1
+  pos_neg_ratio: .1
   n_iterations: 5
-  n_epochs: 10
+  n_epochs: 5
   models:
     - name: "gcn_ff"
       active: True
@@ -22,6 +22,6 @@ classification_settings:
 
 
 output_settings:
-  output_dir: "output/raw/20230423"
-  prefix: "gnn2_ff2"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
+  output_dir: "output/raw/20230424"
+  prefix: "gnn2_ff2_pn0.1"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
   # example: lr_n5_output.csv

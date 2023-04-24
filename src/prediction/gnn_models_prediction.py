@@ -59,7 +59,7 @@ def execute(input_settings, output_settings, classification_settings):
 
             gnn_model = None
             if model["name"] == "gcn_ff":
-                print("Executing GCN + Feed Forward Network")
+                print(f"Iteration {itr}: Executing GCN + Feed Forward Network")
                 gnn_model = GCN_FFN(
                     n_node_features=70,
                     h1=32,
@@ -67,7 +67,7 @@ def execute(input_settings, output_settings, classification_settings):
                     h2=32,
                     n_classes=2)
             elif model["name"] == "gat_ff":
-                print("Executing GAT + Feed Forward Network")
+                print(f"Iteration {itr}: Executing GAT + Feed Forward Network")
                 gnn_model = GAT_FFN(
                     n_node_features=70,
                     h1=32,
