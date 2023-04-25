@@ -25,12 +25,7 @@ class GCN(nn.Module):
 
     def forward(self, x, edge_index,edge_attr):
         for conv in self.conv_layers:
-            edge_attr2 = edge_attr.reshape(np.multiply(*edge_attr.shape[:-1]), 2)
-            # self.edge_attr_mlp = torch.nn.Sequential(nn.Linear(np.multiply(*edge_attr.shape[:-1]), self.hidden_dim), torch.nn.ReLU(),nn.Linear(self.hidden_dim,self.hidden_dim ))
-            # -1 means infer the dimension from the other given dimension
-            edge_attr3 = edge_attr.reshape(edge_attr.shape[0],np.multiply(*edge_attr.shape[1:]))
-            # edge_attr_mlp = self.edge_attr_mlp(edge_attr2)#.view(-1,1,40))
-            x = conv(x, edge_index,edge_attr2) #edge_attr_mlp.view(-1,1,2))
+            x = conv(x, edge_index,edge_attr) 
             x = F.relu(x)
             # x = self.dropout(x)
         return x
@@ -175,7 +170,7 @@ def run_gcn(train, test, output_file):
         output_train, train_acc = _test(model, crit, train_loader)
         output_test, test_acc = _test(model, crit, test_loader)
         print(
-            f"Epoch: {epoch}, Loss: {loss}, Train Acc: {train_acc}, Test Acc: {test_acc}"
+            f"Epoch: {epoch}, Loss: {loss}, Train Loss: {train_acc}, Test Loss: {test_acc}"
         )
         outputs_all_epochs.append([output_train,output_test])
     with open(output_file,'wb') as f:

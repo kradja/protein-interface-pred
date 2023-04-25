@@ -1,6 +1,8 @@
 import argparse
 import json
 import os
+import pickle
+import pdb
 
 import data_preprocessing as dp
 import models
@@ -48,6 +50,12 @@ def main(args):
         output_predictions = os.path.join(params["processed"],'train_test_pred.pkl')
         models.run_gcn(complex_train_files, complex_test_files,output_predictions)
         print("hey")
+    if args.analysis:
+        output_predictions = os.path.join(params["processed"],'train_test_pred.pkl')
+        with open(output_predictions,'rb') as f:
+            pred = pickle.load(f)
+        pdb.set_trace()
+        print(pred)
 
 
 if __name__ == "__main__":
@@ -58,6 +66,10 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-running",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-analysis",
         action="store_true",
     )
     args = parser.parse_args()

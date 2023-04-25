@@ -4,6 +4,8 @@ import pickle
 
 import numpy as np
 import torch
+from torch_geometric.transforms import NormalizeScale
+
 
 
 def convert_data(input_file):
@@ -29,14 +31,15 @@ def write_tensors(data, processed_path, file_descrip):
 
         # Edge Attributes for ligand and Receptor
         ligand_edge_attr = data[1][ind]["l_edge"]
-        #ligand_edge_attr = ligand_edge_attr.reshape(
-        #    np.multiply(*ligand_edge_attr.shape[:-1]), 2
-        #)
+        ligand_edge_attr = ligand_edge_attr.reshape(
+            np.multiply(*ligand_edge_attr.shape[:-1]), 2
+        )
 
         receptor_edge_attr = data[1][ind]["r_edge"]
-        #receptor_edge_attr = receptor_edge_attr.reshape(
-        #    np.multiply(*receptor_edge_attr.shape[:-1]), 2
-        #)
+        receptor_edge_attr = receptor_edge_attr.reshape(
+            np.multiply(*receptor_edge_attr.shape[:-1]), 2
+        )
+        pdb.set_trace()
 
         # Edge Indices for ligand and Receptor
         ligand_ind = data[1][ind]["l_hood_indices"]
@@ -64,6 +67,7 @@ def write_tensors(data, processed_path, file_descrip):
         )
         # ligand = Data(x=torch.tensor(ligand_aa_features, dtype=torch.float), edge_index=torch.tensor(ligand_edge_index, dtype=torch.long), edge_attr=torch.tensor(ligand_edge_attr, dtype=torch.float))
         # receptor = Data(x=torch.tensor(receptor_aa_features, dtype=torch.float), edge_index=torch.tensor(receptor_edge_index, dtype=torch.long), edge_attr=torch.tensor(receptor_edge_attr, dtype=torch.float))
+        # data.x = (data.x - data.x.min()) / (data.x.max() - data.x.min())
         complex_tensors = {
             "ligand": {
                 "x": torch.tensor(ligand_aa_features, dtype=torch.float),
