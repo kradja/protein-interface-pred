@@ -26,7 +26,8 @@ class GCN(nn.Module):
     def forward(self, x, edge_index,edge_attr):
         for conv in self.conv_layers:
             x = conv(x, edge_index,edge_attr) 
-            x = F.relu(x)
+            # x = F.relu(x)
+            x = torch.sigmoid(x)
             # x = self.dropout(x)
         return x
 
@@ -44,9 +45,9 @@ class FFN_GCNs(nn.Module):
         # First and second columns of label
         x = torch.cat((x_ligand[label[:, 0]], x_receptor[label[:, 1]]), dim=1)
         x = self.fc(x)
-        x = F.relu(x)
+        #x = F.relu(x)
         # x = self.dropout(x)
-        #x = torch.sigmoid(x)
+        x = torch.sigmoid(x)
         return x
 
 
@@ -116,7 +117,8 @@ def _train(model, crit, optimizer, input_data):
         output = model(
             batch.x_s, batch.edge_index_s, batch.edge_attr_s, batch.x_t, batch.edge_index_t, batch.edge_attr_t, batch.y
         )
-        out = torch.sigmoid(output.to(torch.float32))
+        # out = torch.sigmoid(output.to(torch.float32))
+        out = output.to(torch.float32)
         #out = torch.round(output.flatten()).to(torch.int)
         #tmp = np.array(out.tolist())
         #rr = np.sum(tmp[np.where(tmp > 0.5)])
@@ -125,8 +127,19 @@ def _train(model, crit, optimizer, input_data):
         loss = crit(out, batch.y[:, 2].to(torch.float32).unsqueeze(1))
         totalloss += loss.item()
         loss.backward()
+        # Print the gradients before and after the optimizer step
+        #print('Gradients before optimizer step:')
+        #for name, param in model.named_parameters():
+        #    if param.requires_grad and param.grad is not None and "fc" in name:
+        #print(f'fc_weight:{model.fc.weight}')
         optimizer.step()
-    return totalloss  # loss.item()
+        #print('Gradients after optimizer step:')
+        #for name, param in model.named_parameters():
+        #    if param.requires_grad and param.grad is not None and "fc" in name:
+        #        print(f'{name}: {param.grad}')
+        #print(f'fc_weight:{model.fc.weight}')
+        #pdb.set_trace()
+    return totalloss/len(input_data)  # loss.item()
 
 
 def _test(model, crit, input_data):
@@ -137,14 +150,16 @@ def _test(model, crit, input_data):
         output = model(
             batch.x_s, batch.edge_index_s, batch.edge_attr_s, batch.x_t, batch.edge_index_t, batch.edge_attr_t, batch.y
         )
-        out = output.flatten().to(torch.float32)
-        # out = torch.round(output.flatten()).to(torch.int)
-        tmp = np.array(torch.round(out).tolist())
-        final_out.append([tmp,np.array(batch.y[:, 2])])
-        rr = len(np.where(tmp == 1)[0])
-        if rr > 0:
-            print(f'Something! {rr}')
-        loss += crit(out, batch.y[:, 2].to(torch.float32)).item()
+        # out = torch.sigmoid(output.to(torch.float32))
+        # out = output.flatten().to(torch.float32)
+        out = torch.round(output.to(torch.float32))
+        # tmp = np.array(torch.round(out).tolist())
+        final_out.append([out.flatten(),np.array(batch.y[:, 2])])
+        #rr = len(np.where(tmp == 1)[0])
+        #if rr > 0:
+        #    print(f'Something! {rr}')
+        loss += crit(out, batch.y[:, 2].to(torch.float32).unsqueeze(1)).item()
+        # loss = crit(out, batch.y[:, 2].to(torch.float32).unsqueeze(1))
     return final_out, loss / len(input_data)
 
 
@@ -157,7 +172,7 @@ def run_gcn(train, test, output_file):
         data_train, batch_size=1, shuffle=True
     )  # ,num_workers=2)
     test_loader = _make_data_loader(
-        data_test, batch_size=1, shuffle=False
+        data_test, batch_size=1, shuffle=True
     )  # ,num_workers=2)
 
     # Run GCN (The number of features is always 70)
@@ -165,7 +180,7 @@ def run_gcn(train, test, output_file):
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     crit = nn.BCELoss()
     outputs_all_epochs = []
-    for epoch in range(10):
+    for epoch in range(4):
         loss = _train(model, crit, optimizer, train_loader)
         output_train, train_acc = _test(model, crit, train_loader)
         output_test, test_acc = _test(model, crit, test_loader)

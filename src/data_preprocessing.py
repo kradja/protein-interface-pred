@@ -13,14 +13,19 @@ def convert_data(input_file):
         data = pickle.load(f, encoding="latin")
     return data
 
+def _normalize_matrix_zero_one(data):
+    """Normalize matrix between 0 and 1"""
+    data = data - np.min(data)
+    data = data / np.max(data)
+    return data
 
 def write_tensors(data, processed_path, file_descrip):
     """Writing tensors for each complex to processed folder"""
     complex_data = dict()
     for ind, complex_id in enumerate(data[0]):
         # Features for ligand and receptor
-        ligand_aa_features = data[1][ind]["l_vertex"]
-        receptor_aa_features = data[1][ind]["r_vertex"]
+        ligand_aa_features = _normalize_matrix_zero_one(data[1][ind]["l_vertex"])
+        receptor_aa_features = _normalize_matrix_zero_one(data[1][ind]["r_vertex"])
         # length_ligand = len(ligand_aa_features)
         # length_receptor= len(receptor_aa_features)
 
@@ -31,15 +36,14 @@ def write_tensors(data, processed_path, file_descrip):
 
         # Edge Attributes for ligand and Receptor
         ligand_edge_attr = data[1][ind]["l_edge"]
-        ligand_edge_attr = ligand_edge_attr.reshape(
+        ligand_edge_attr = _normalize_matrix_zero_one(ligand_edge_attr.reshape(
             np.multiply(*ligand_edge_attr.shape[:-1]), 2
-        )
+        ))
 
         receptor_edge_attr = data[1][ind]["r_edge"]
-        receptor_edge_attr = receptor_edge_attr.reshape(
+        receptor_edge_attr = _normalize_matrix_zero_one(receptor_edge_attr.reshape(
             np.multiply(*receptor_edge_attr.shape[:-1]), 2
-        )
-        pdb.set_trace()
+        ))
 
         # Edge Indices for ligand and Receptor
         ligand_ind = data[1][ind]["l_hood_indices"]
