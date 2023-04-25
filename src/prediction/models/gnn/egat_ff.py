@@ -33,7 +33,7 @@ class EGAT_2L(torch.nn.Module):
         self.gat_l2 = GATConv(h, n_output_features, edge_dim=n_edge_features)
 
     def forward(self, data):
-        x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr
+        x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr.type(torch.float32)
         x = self.gat_l1(x, edge_index, edge_attr)
         x = F.relu(x)
         x = self.gat_l2(x, edge_index, edge_attr)
