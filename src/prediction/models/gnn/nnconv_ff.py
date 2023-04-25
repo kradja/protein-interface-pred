@@ -8,8 +8,9 @@ from src.prediction.models.gnn.ffn import FFN_2L
 class NNConv_FF(nn.ModuleList):
     def __init__(self, n_node_features, n_edge_features, n_gnn_output_features, ff_h, n_classes):
         super(NNConv_FF, self).__init__()
-        self.mlp = nn.Sequential(nn.Linear(n_edge_features, n_node_features * n_gnn_output_features),
-                                 nn.ReLU())
+        self.mlp = nn.Sequential(nn.Linear(n_edge_features, n_node_features),
+                                 nn.ReLU(),
+                                 nn.Linear(n_node_features, n_node_features * n_gnn_output_features))
         self.ligand_nnconv = NNConv(in_channels=n_node_features,
                                     out_channels=n_gnn_output_features,
                                     nn=copy.deepcopy(self.mlp))

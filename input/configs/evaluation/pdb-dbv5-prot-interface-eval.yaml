@@ -11,11 +11,13 @@ input_settings:
     # experiment_name (to be used as a key in comparative analysis): file_name
     "LR": "20230405/pdb-dbv5_lr_output.csv"
     "RF": "20230405/pdb-dbv5_rf_output.csv"
-    "GCN2-FFN2": "20230424/gnn2_ff2_pn0.1_gcn_ff_output.csv"
-    "GAT2-FFN2": "20230424/gnn2_ff2_pn0.1_gat_ff_output.csv"
-    "NNConv_FFN2": "20230424/gnn2_ff2_pn0.1_nnconv_ff_output.csv"
-    #"GCN6-FFN2": "20230416/gnn6_ff2_gcn_ff_output.csv"
-    #"GAT6-FFN2": "20230416/gnn6_ff2_gat_ff_output.csv"
+    "GCN2": "20230424/gnn2_ff2_pn0.1_gcn_ff_output.csv"
+    "GAT2": "20230424/gnn2_ff2_pn0.1_gat_ff_output.csv"
+    "NNConv": "20230424/gnn2_ff2_pn0.1_nnconv_ff_output.csv"
+    "W-GCN2": "20230424/gnn2_ff2_pn0.1_weightedloss_gcn_ff_output.csv"
+    "W-GAT2": "20230424/gnn2_ff2_pn0.1_weightedloss_gat_ff_output.csv"
+    "W-NNConv": "20230424/gnn2_ff2_pn0.1_weightedloss_nnconv_ff_output.csv"
+
 
 evaluation_settings:
   pos_label: 1
