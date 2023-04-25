@@ -157,12 +157,12 @@ def train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, tbw, 
         output = gnn_model(ligand_graph, receptor_graph, pairs).to(utils.get_device()).squeeze()
         labels = labels.squeeze()
 
-        # loss = get_criterion(output, labels,
-        #                      weight=torch.tensor(compute_class_weight(
-        #                          class_weight="balanced",
-        #                          classes=np.unique(labels.cpu().numpy()),
-        #                          y=labels.type(torch.float32).cpu().numpy()), dtype=torch.float32).to(utils.get_device()))
-        loss = get_criterion(output, labels, weight=None)
+        loss = get_criterion(output, labels,
+                             weight=torch.tensor(compute_class_weight(
+                                 class_weight="balanced",
+                                 classes=np.unique(labels.cpu().numpy()),
+                                 y=labels.type(torch.float32).cpu().numpy()), dtype=torch.float32).to(utils.get_device()))
+        #loss = get_criterion(output, labels, weight=None)
         loss.backward()
 
         optimizer.step()
@@ -207,8 +207,8 @@ def test_gnn_model(gnn_model, test_data_loader, tbw, model_name, itr, epoch, log
         if log_loss:
             itr += 1
             pbar.set_description(f"{model_name}/validation-loss={val_loss}, epoch={epoch + 1}")
+            tbw.add_scalar(f"{model_name}/validation-loss", val_loss, itr)
             tbw.add_scalars(f"{model_name}/validation-loss-pos-neg", loss_map, itr)
-            tbw.add_scalars(f"{model_name}/validation-loss", val_loss, itr)
         # Explicity apply softmax to the output to get the probabilities, since
         # we did not include F.softmax() activation in the Feed Forward Network
         output = F.softmax(output, dim=-1)
