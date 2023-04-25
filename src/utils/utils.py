@@ -33,5 +33,3 @@ def write_output(model_dfs, output_dir, output_filename_prefix, output_type):
         print(f"Writing {output_type} of {model_name} to {output_file_path}")
         pd.concat(dfs).to_csv(output_file_path, index=False)
 
-
-#def compute_loss()

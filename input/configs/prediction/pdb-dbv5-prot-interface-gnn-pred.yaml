@@ -26,5 +26,5 @@ classification_settings:
 
 output_settings:
   output_dir: "output/raw/20230424"
-  prefix: "gnn2_ff2_pn0.1_weightedloss"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
+  prefix: "gnn2_ff2_pn0.1"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
   # example: lr_n5_output.csv

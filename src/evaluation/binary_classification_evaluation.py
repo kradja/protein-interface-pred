@@ -82,13 +82,13 @@ class BinaryClassEvaluation:
             visualization_utils.box_plot(self.evaluation_metrics_df, self.experiment_col, "f1", self.visualization_output_file_path + "_f1_boxplot.png")
         if self.evaluation_settings["auroc"]:
             visualization_utils.box_plot(self.evaluation_metrics_df, self.experiment_col, "auroc",
-                                         self.visualization_output_file_path + "_auroc_boxplot.png")
+                                         self.visualization_output_file_path + "_auroc_boxplot.png",baseline=0.5)
             # visualization_utils.curve_plot(df=self.roc_curves_df, x_col="fpr", y_col="tpr",
             #                                color_group_col=self.experiment_col, style_group_col=self.itr_col,
             #                                output_file_path=self.visualization_output_file_path + "_roc_curves.png")
         if self.evaluation_settings["auprc"]:
             visualization_utils.box_plot(self.evaluation_metrics_df, self.experiment_col, "auprc",
-                                         self.visualization_output_file_path + "_auprc_boxplot.png")
+                                         self.visualization_output_file_path + "_auprc_boxplot.png", baseline=0.1)
             # visualization_utils.curve_plot(df=self.pr_curves_df, x_col="recall", y_col="precision",
             #                                color_group_col=self.experiment_col, style_group_col=self.itr_col,
             #                                output_file_path=self.visualization_output_file_path + "_precision_recall_curves.png")

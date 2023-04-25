@@ -6,13 +6,13 @@ def box_plot(df, x_col, y_col, output_file_path, baseline=None):
     plt.clf()
     sns.set_theme()
 
+    plt.rcParams['xtick.labelsize'] = 8
+    plt.figure(figsize=(8,6))
     ax = sns.boxplot(data=df, x=x_col, y=y_col)
     if baseline is not None:
-        ax.axvline(baseline, color="gray", linestyle="--")
+        ax.axhline(baseline, color="gray", linestyle="--")
     ax.set_ylim(0, 1)
-    plt.rcParams['xtick.labelsize'] = 8
     plt.tight_layout()
-    #plt.figure(figsize=(12, 8))
     plt.xticks(rotation=-90)
     plt.savefig(output_file_path)
 
