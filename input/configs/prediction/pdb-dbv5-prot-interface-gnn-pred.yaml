@@ -21,6 +21,9 @@ classification_settings:
       active: False
 
     - name: "nnconv_ff"
+      active: False
+
+    - name: "egat_ff"
       active: True
 
 
