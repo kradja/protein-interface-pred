@@ -5,11 +5,11 @@ from src.prediction.models.gnn.ffn import FFN_2L
 
 
 class GAT_FFN(torch.nn.ModuleList):
-    def __init__(self, n_node_features, h1, n_gcn_output_features, h2, n_classes):
+    def __init__(self, n_node_features, h1, n_gat_output_features, h2, n_classes):
         super(GAT_FFN, self).__init__()
-        self.ligand_gcn = GAT_2L(n_node_features, h1, n_gcn_output_features)
-        self.receptor_gcn = GAT_2L(n_node_features, h1, n_gcn_output_features)
-        self.ffn = FFN_2L(2*n_gcn_output_features, h2, n_classes)
+        self.ligand_gcn = GAT_2L(n_node_features, h1, n_gat_output_features)
+        self.receptor_gcn = GAT_2L(n_node_features, h1, n_gat_output_features)
+        self.ffn = FFN_2L(2*n_gat_output_features, h2, n_classes)
 
     def forward(self, data_l, data_r, X):
         x_ligand = self.ligand_gcn(data_l)

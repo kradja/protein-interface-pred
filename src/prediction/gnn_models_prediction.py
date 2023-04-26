@@ -77,7 +77,7 @@ def execute(input_settings, output_settings, classification_settings):
                 gnn_model = GAT_FFN(
                     n_node_features=70,
                     h1=32,
-                    n_gcn_output_features=32,
+                    n_gat_output_features=32,
                     h2=32,
                     n_classes=2)
             elif model["name"] == "nnconv_ff":
@@ -86,6 +86,8 @@ def execute(input_settings, output_settings, classification_settings):
                     n_node_features=70,
                     n_edge_features=2,
                     n_gnn_output_features=32,
+                    nnconv_h1=16,
+                    nnconv_h2=16,
                     ff_h=32,
                     n_classes=2)
             elif model["name"] == "egat_ff":
@@ -101,7 +103,8 @@ def execute(input_settings, output_settings, classification_settings):
                 continue
             gnn_model = gnn_model.to(utils.get_device())
             result = run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name,
-                                   classification_settings["n_epochs"])
+                                   classification_settings["n_epochs"],
+                                   classification_settings["weighted_loss"])
             result["model"] = model_name
             result["itr"] = itr
             results[model_name].append(result)
@@ -115,7 +118,7 @@ def get_criterion(output, labels, weight=None):
     return criterion(output, labels)
 
 
-def run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name, n_epochs):
+def run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name, n_epochs, weighted_loss):
     tbw = SummaryWriter()
 
     lr = 1e-4
@@ -138,7 +141,7 @@ def run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name, n_
     test_itr = 0
     for epoch in range(n_epochs):
         gnn_model, train_itr = train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, tbw,
-                                               model_name, train_itr, epoch)
+                                               model_name, train_itr, epoch, weighted_loss)
         _, test_itr = test_gnn_model(gnn_model, test_data_loader, tbw, model_name, test_itr, epoch,
                                      log_loss=True)
     results, _ = test_gnn_model(gnn_model, test_data_loader, tbw, model_name, itr=None, epoch=None,
@@ -146,7 +149,7 @@ def run_gnn_model(gnn_model, train_data_loader, test_data_loader, model_name, n_
     return results
 
 
-def train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, tbw, model_name, itr, epoch):
+def train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, tbw, model_name, itr, epoch, weighted_loss):
     gnn_model.train()
     for _, batch in enumerate(pbar := tqdm.tqdm(train_data_loader)):
         itr += 1
@@ -157,12 +160,15 @@ def train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, tbw, 
         output = gnn_model(ligand_graph, receptor_graph, pairs).to(utils.get_device()).squeeze()
         labels = labels.squeeze()
 
-        loss = get_criterion(output, labels,
-                             weight=torch.tensor(compute_class_weight(
-                                 class_weight="balanced",
-                                 classes=np.unique(labels.cpu().numpy()),
-                                 y=labels.type(torch.float32).cpu().numpy()), dtype=torch.float32).to(utils.get_device()))
-        #loss = get_criterion(output, labels, weight=None)
+        if weighted_loss:
+            loss = get_criterion(output, labels,
+                                 weight=torch.tensor(compute_class_weight(
+                                     class_weight="balanced",
+                                     classes=np.unique(labels.cpu().numpy()),
+                                     y=labels.type(torch.float32).cpu().numpy()),
+                                     dtype=torch.float32).to(utils.get_device()))
+        else:
+            loss = get_criterion(output, labels, weight=None)
         loss.backward()
 
         optimizer.step()

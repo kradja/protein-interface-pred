@@ -12,22 +12,23 @@ classification_settings:
   type: "gnn" # supported values: baseline, gnn
   pos_neg_ratio: .1
   n_iterations: 5
-  n_epochs: 5
+  n_epochs: 10
+  weighted_loss: False
   models:
     - name: "gcn_ff"
-      active: False
+      active: True
 
     - name: "gat_ff"
-      active: False
+      active: True
 
     - name: "nnconv_ff"
-      active: False
+      active: True
 
     - name: "egat_ff"
-      active: True
+      active: False
 
 
 output_settings:
-  output_dir: "output/raw/20230424"
+  output_dir: "output/raw/20230426"
   prefix: "gnn2_ff2_pn0.1_weightedloss"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
   # example: lr_n5_output.csv

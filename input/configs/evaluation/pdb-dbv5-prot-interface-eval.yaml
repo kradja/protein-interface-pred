@@ -18,6 +18,7 @@ input_settings:
     "W-GCN": "20230424/gnn2_ff2_pn0.1_weightedloss_gcn_ff_output.csv"
     "W-GAT": "20230424/gnn2_ff2_pn0.1_weightedloss_gat_ff_output.csv"
     "W-NNConv": "20230424/gnn2_ff2_pn0.1_weightedloss_nnconv_ff_output.csv"
+    "W-EGAT": "20230424/gnn2_ff2_pn0.1_weightedloss_egat_ff_output.csv"
 
 
 evaluation_settings:
