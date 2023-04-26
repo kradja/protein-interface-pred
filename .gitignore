@@ -29,3 +29,4 @@ src/jupyter-notebooks/runs/*
 
 #tensorboard files
 runs/*
+runs-vanilla-weighted/*
