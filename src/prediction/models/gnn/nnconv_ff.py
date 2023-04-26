@@ -1,4 +1,5 @@
 import torch
+import copy
 import torch.nn as nn
 from torch_geometric.nn.conv import NNConv
 import torch.nn.functional as F
@@ -6,25 +7,36 @@ from src.prediction.models.gnn.ffn import FFN_2L
 
 
 class NNConv_FFN(nn.ModuleList):
-    def __init__(self, n_node_features, n_edge_features, n_gnn_output_features, nnconv_h1, nnconv_h2, ff_h, n_classes):
+    def __init__(self, n_node_features, n_edge_features, n_gnn_output_features, nnconv_h, ff_h, n_classes):
         super(NNConv_FFN, self).__init__()
 
-        self.ligand_nnconv = NNConv_2L(n_node_features=n_node_features,
-                                       n_edge_features=n_edge_features,
-                                       h1=nnconv_h1,
-                                       h2=nnconv_h2,
-                                       n_gnn_output_features=n_gnn_output_features)
-
-        self.receptor_nnconv = NNConv_2L(n_node_features=n_node_features,
-                                         n_edge_features=n_edge_features,
-                                         h1=nnconv_h1,
-                                         h2=nnconv_h2,
-                                         n_gnn_output_features=n_gnn_output_features)
+        self.mlp = nn.Sequential(nn.Linear(n_edge_features, nnconv_h),
+                                  nn.ReLU(),
+                                  nn.Linear(nnconv_h, n_node_features * n_gnn_output_features))
+        self.ligand_nnconv = NNConv(in_channels=n_node_features,
+                                out_channels=n_gnn_output_features,
+                                nn=copy.deepcopy(self.mlp))
+        self.receptor_nnconv  = NNConv(in_channels=n_node_features,
+                                    out_channels=n_gnn_output_features,
+                                    nn=copy.deepcopy(self.mlp))
+        # self.ligand_nnconv = NNConv_2L(n_node_features=n_node_features,
+        #                                n_edge_features=n_edge_features,
+        #                                h1=nnconv_h1,
+        #                                h2=nnconv_h2,
+        #                                n_gnn_output_features=n_gnn_output_features)
+        #
+        # self.receptor_nnconv = NNConv_2L(n_node_features=n_node_features,
+        #                                  n_edge_features=n_edge_features,
+        #                                  h1=nnconv_h1,
+        #                                  h2=nnconv_h2,
+        #                                  n_gnn_output_features=n_gnn_output_features)
         self.ffn = FFN_2L(2 * n_gnn_output_features, ff_h, n_classes)
 
     def forward(self, data_l, data_r, X):
-        x_ligand = self.ligand_nnconv(data_l)
-        x_receptor = self.receptor_nnconv(data_r)
+        x_ligand = self.ligand_nnconv(data_l.x, data_l.edge_index, data_l.edge_attr.type(torch.float32))
+        x_receptor = self.receptor_nnconv(data_r.x, data_r.edge_index, data_r.edge_attr.type(torch.float32))
+        # x_ligand = self.ligand_nnconv(data_l)
+        # x_receptor = self.receptor_nnconv(data_r)
         # shape pf X is b x n x 2
         # since in our case, b is always 1: we are processing one pair of graphs at a time
         # we can squeeze X

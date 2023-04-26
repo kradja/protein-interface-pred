@@ -6,7 +6,7 @@ def box_plot(df, x_col, y_col, output_file_path, baseline=None):
     plt.clf()
     sns.set_theme()
 
-    plt.rcParams['xtick.labelsize'] = 8
+    plt.rcParams['xtick.labelsize'] = 10
     plt.figure(figsize=(8,6))
     ax = sns.boxplot(data=df, x=x_col, y=y_col)
     sns.stripplot(data=df, x=x_col, y=y_col, jitter=False, marker="o", color="black", alpha=0.7, linewidth=0.5, ax=ax)

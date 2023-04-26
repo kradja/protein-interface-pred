@@ -19,6 +19,10 @@ input_settings:
     "W-GAT": "20230426/gnn2_ff2_pn0.1_weightedloss_gat_ff_output.csv"
     "W-NNConv": "20230424/gnn2_ff2_pn0.1_weightedloss_nnconv_ff_output.csv"
     "W-EGAT": "20230426/gnn2_ff2_pn0.1_weightedloss_egat_ff_output.csv"
+    "F-GCN": "20230426-1/gnn2_ff2_pn0.1_focalloss_gcn_ff_output.csv"
+    "F-GAT": "20230426-1/gnn2_ff2_pn0.1_focalloss_gat_ff_output.csv"
+    "F-NNConv": "20230426-1/gnn2_ff2_pn0.1_focalloss_nnconv_ff_output.csv"
+    "F-EGAT": "20230426-1/gnn2_ff2_pn0.1_focalloss_egat_ff_output.csv"
 
 
 evaluation_settings:
@@ -35,5 +39,5 @@ output_settings:
   output_dir: "output"
   evaluation_dir: "evaluation"
   visualization_dir: "visualizations"
-  dataset_dir: "20230426"
+  dataset_dir: "20230426-1"
   prefix: "pn0.1"# default: none; default file name = <output_prefix>_<model_name>_output.csv
