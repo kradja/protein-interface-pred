@@ -87,8 +87,7 @@ def execute(input_settings, output_settings, classification_settings):
                     n_node_features=70,
                     n_edge_features=2,
                     n_gnn_output_features=32,
-                    nnconv_h1=16,
-                    nnconv_h2=16,
+                    nnconv_h=64,
                     ff_h=32,
                     n_classes=2)
             elif model["name"] == "egat_ff":
