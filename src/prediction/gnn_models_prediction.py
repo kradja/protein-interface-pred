@@ -17,6 +17,7 @@ from src.prediction.models.gnn.gcn_ff import GCN_FFN
 from src.prediction.models.gnn.gat_ff import GAT_FFN
 from src.prediction.models.gnn.nnconv_ff import NNConv_FFN
 from src.prediction.models.gnn.egat_ff import EGAT_FFN
+from src.prediction.models.gnn.focal_loss import FocalLoss
 from src.utils import utils
 
 
@@ -113,10 +114,9 @@ def execute(input_settings, output_settings, classification_settings):
     utils.write_output(results, output_dir, output_prefix, "output")
 
 
-def get_focal_loss(output, labels, alpha, gamma):
-    # use CrossEntropyLoss by setting reduction=None (reduction is for aggregation of the loss of all samples
-    # this returns the loss for each sample
-    criterion = nn.CrossEntropyLoss(weight=alpha, reduction=None)
+def get_focal_loss(output, labels, weight=None):
+    criterion = FocalLoss(alpha=weight, gamma=2)
+    return criterion(output, labels)
     
 
 def get_criterion(output, labels, weight=None):
@@ -167,12 +167,18 @@ def train_gnn_model(gnn_model, train_data_loader, optimizer, lr_scheduler, tbw, 
         labels = labels.squeeze()
 
         if weighted_loss:
-            loss = get_criterion(output, labels,
+            loss = get_focal_loss(output, labels,
                                  weight=torch.tensor(compute_class_weight(
                                      class_weight="balanced",
                                      classes=np.unique(labels.cpu().numpy()),
                                      y=labels.type(torch.float32).cpu().numpy()),
                                      dtype=torch.float32).to(utils.get_device()))
+            # loss = get_criterion(output, labels,
+            #                      weight=torch.tensor(compute_class_weight(
+            #                          class_weight="balanced",
+            #                          classes=np.unique(labels.cpu().numpy()),
+            #                          y=labels.type(torch.float32).cpu().numpy()),
+            #                          dtype=torch.float32).to(utils.get_device()))
         else:
             loss = get_criterion(output, labels, weight=None)
         loss.backward()

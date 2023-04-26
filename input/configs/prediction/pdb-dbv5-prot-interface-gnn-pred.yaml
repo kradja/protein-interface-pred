@@ -16,19 +16,19 @@ classification_settings:
   weighted_loss: True
   models:
     - name: "gcn_ff"
-      active: False
+      active: True
 
     - name: "gat_ff"
-      active: False
+      active: True
 
     - name: "nnconv_ff"
-      active: False
+      active: True
 
     - name: "egat_ff"
       active: True
 
 
 output_settings:
-  output_dir: "output/raw/20230426"
-  prefix: "gnn2_ff2_pn0.1_weightedloss"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
+  output_dir: "output/raw/20230426-1"
+  prefix: "gnn2_ff2_pn0.1_focalloss"   # default: none; default file name = <output_prefix>_<model_name>_output.csv
   # example: lr_n5_output.csv
