@@ -13,7 +13,7 @@ classification_settings:
   pos_neg_ratio: .1
   n_iterations: 5
   n_epochs: 10
-  weighted_loss: False
+  weighted_loss: True
   models:
     - name: "gcn_ff"
       active: False
