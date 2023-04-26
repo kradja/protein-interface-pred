@@ -16,16 +16,16 @@ classification_settings:
   weighted_loss: False
   models:
     - name: "gcn_ff"
-      active: True
+      active: False
 
     - name: "gat_ff"
-      active: True
+      active: False
 
     - name: "nnconv_ff"
-      active: True
+      active: False
 
     - name: "egat_ff"
-      active: False
+      active: True
 
 
 output_settings:

@@ -113,6 +113,12 @@ def execute(input_settings, output_settings, classification_settings):
     utils.write_output(results, output_dir, output_prefix, "output")
 
 
+def get_focal_loss(output, labels, alpha, gamma):
+    # use CrossEntropyLoss by setting reduction=None (reduction is for aggregation of the loss of all samples
+    # this returns the loss for each sample
+    criterion = nn.CrossEntropyLoss(weight=alpha, reduction=None)
+    
+
 def get_criterion(output, labels, weight=None):
     criterion = nn.CrossEntropyLoss(weight)
     return criterion(output, labels)
