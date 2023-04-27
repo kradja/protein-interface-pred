@@ -51,7 +51,7 @@ def main(args):
         models.run_gcn(complex_train_files, complex_test_files,output_predictions)
         print("hey")
     if args.analysis:
-        output_predictions = os.path.join(params["processed"],'train_test_pred.pkl')
+        output_predictions = os.path.join(params["processed"],'train_test_pred_program2.pkl')
         with open(output_predictions,'rb') as f:
             pred = pickle.load(f)
         pdb.set_trace()

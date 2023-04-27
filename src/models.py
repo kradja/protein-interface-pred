@@ -145,6 +145,7 @@ def _train(model, crit, optimizer, input_data):
 def _test(model, crit, input_data):
     model.eval()
     loss = 0
+    total_len = []
     final_out = []
     for batch in input_data:
         output = model(
@@ -155,11 +156,15 @@ def _test(model, crit, input_data):
         out = torch.round(output.to(torch.float32))
         # tmp = np.array(torch.round(out).tolist())
         final_out.append([out.flatten(),np.array(batch.y[:, 2])])
-        #rr = len(np.where(tmp == 1)[0])
+        #rr = len(np.where(batch.y[:,2] == 1)[0])
+        x1 = np.count_nonzero(batch.y[:,2])
+        x2 = batch.y[:,2]
+        total_len.append([x1,len(x2)-x1])
         #if rr > 0:
         #    print(f'Something! {rr}')
         loss += crit(out, batch.y[:, 2].to(torch.float32).unsqueeze(1)).item()
         # loss = crit(out, batch.y[:, 2].to(torch.float32).unsqueeze(1))
+    pdb.set_trace()
     return final_out, loss / len(input_data)
 
 
@@ -183,7 +188,10 @@ def run_gcn(train, test, output_file):
     for epoch in range(4):
         loss = _train(model, crit, optimizer, train_loader)
         output_train, train_acc = _test(model, crit, train_loader)
+        print("START")
         output_test, test_acc = _test(model, crit, test_loader)
+        pdb.set_trace()
+        print("END")
         print(
             f"Epoch: {epoch}, Loss: {loss}, Train Loss: {train_acc}, Test Loss: {test_acc}"
         )

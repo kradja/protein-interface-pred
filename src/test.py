@@ -5,6 +5,7 @@ import json
 import os
 import numpy as np
 import torch.nn.functional as F
+from torch.optim.lr_scheduler import OneCycleLR
 from torch_geometric.nn import GCNConv
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
@@ -106,13 +107,22 @@ def main(train_file, test_file, output_file):
     
     input_dim = 70
     hidden_dim = 32
-    lr = 0.005
+    #lr = 0.005
     epochs = 10 #number of training epochs
 
     # model, optimizer and loss function
     model = GCNClassifier(input_dim, hidden_dim)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
     criterion = torch.nn.BCELoss()
+    lr_scheduler = OneCycleLR(
+        optimizer=optimizer,
+        max_lr=1e-2,
+        epochs=epochs,
+        steps_per_epoch=len(train_loader),
+        pct_start=0.1,
+        anneal_strategy='cos',
+        div_factor=25.0,
+        final_div_factor=10000.0)
 
     # Iterations
     final_output = {"test": {}, "train": {}}
@@ -123,12 +133,12 @@ def main(train_file, test_file, output_file):
             optimizer.zero_grad()
             pred = model(data)
 
-            #rr = np.count_nonzero(data.y[:,2])/len(data.y[:,2])
             labels = data.y[:, 2].to(torch.float32)#.unsqueeze(1)
             bceloss = criterion(pred.squeeze().to(torch.float32), labels)
             loss = focal_loss(bceloss, labels)
             loss.backward()
             optimizer.step()
+            lr_scheduler.step()
             train_loss += loss.item()
 
         y_true,y_scores,y_pred, val_loss= test_model(model, test_loader, criterion)
